@@ -48,8 +48,8 @@ public class View extends JFrame {
         userGamePanel.setSize(FRAME_WIDTH / 2, FRAME_WIDTH / 2);
         userPanel.add(userGamePanel);
 
-        createPlayerNamePanel(userPanel, askUserName());
-        System.out.println(askUserName());
+        createPlayerNamePanel(userPanel, playerName);
+        System.out.println(playerName);
         createUserGameField(userGamePanel);
     }
 
@@ -63,6 +63,7 @@ public class View extends JFrame {
         opponentPanel.add(opponentGamePanel);
 
         createPlayerNamePanel(opponentPanel, "Opponent");
+
         createOpponentField(opponentGamePanel);
     }
 

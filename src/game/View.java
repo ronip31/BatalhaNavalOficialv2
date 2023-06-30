@@ -3,6 +3,7 @@ package game;
 import battlefield.*;
 import exception.ShipBoundException;
 import exception.ShipExistException;
+import network.Client;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,6 +15,7 @@ import java.awt.event.MouseEvent;
 import static javax.swing.SwingUtilities.*;
 
 public class View extends JFrame {
+    private Client client;
     private final int WIDTH = 11;
     private final int HEIGHT = 11;
     private int FRAME_WIDTH;
@@ -21,8 +23,10 @@ public class View extends JFrame {
     private JButton[][] userButtons;
     private JButton[][] opponentButtons;
     private Controller controller;
+    private String opponentName;
 
     public View(final Controller controller, String playerName) throws ShipExistException, ShipBoundException {
+        this.client = client;
         this.userButtons = new JButton[WIDTH][HEIGHT];
         this.opponentButtons = new JButton[WIDTH][HEIGHT];
        // createView(askUserName());
@@ -62,7 +66,7 @@ public class View extends JFrame {
         opponentGamePanel.setSize(FRAME_WIDTH / 2, FRAME_WIDTH / 2);
         opponentPanel.add(opponentGamePanel);
 
-        createPlayerNamePanel(opponentPanel, "Opponent");
+        createPlayerNamePanel(opponentPanel, "Campo do Oponente");
 
         createOpponentField(opponentGamePanel);
     }
@@ -225,7 +229,8 @@ public class View extends JFrame {
                 if (SwingUtilities.isLeftMouseButton(arg0)) {
                     // Captura do clique do jogador no campo do adversário
                     controller.opponentBoardClicked(row, column);
-                    System.out.println("Jogador clicou na posição: (" + row + ", " + column + ")");
+                    System.out.println("Jogador clicou na posição:" + row + column );
+                  //  client.sendPositionToServer(row, column);
                 }
             }
         });

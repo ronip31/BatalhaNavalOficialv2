@@ -12,6 +12,7 @@ public class BattleField {
     public static final int HIT = 1;
     public static final int HORIZONTAL = 0;
     public static final int VERTICAL = 1;
+    public static int SHIP;
     private int[][] field;
 
     public BattleField() {
@@ -30,6 +31,10 @@ public class BattleField {
         if (isAnyShip(x, y, direction, ship)) throw new ShipExistException();
         addShip(x, y, direction, ship);
 
+    }
+    public boolean isShipPresent(int x, int y) {
+        System.out.println("isAnyShip: " + x + y);
+        return field[x][y] != EMPTY && field[x][y] != MISS;
     }
 
     private boolean isShipFit(int x, int y, int direction, Ship ship) {
@@ -65,10 +70,11 @@ public class BattleField {
         }
     }
 
-    public void shoot(int x, int y) throws ShotException { // TODO is missed or hitted or empty or hit a ship
+    public boolean shoot(int x, int y) throws ShotException { // TODO is missed or hitted or empty or hit a ship
         if (isShot(x, y)) throw new ShotException();
         if (isEmpty(x, y)) field[x][y] = MISS;
         else field[x][y] = HIT;
+        return false;
     }
 
     private boolean isShot(int x, int y) {

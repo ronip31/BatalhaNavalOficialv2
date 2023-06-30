@@ -1,5 +1,8 @@
 package network;
 
+import battlefield.BattleField;
+import exception.ShotException;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -8,19 +11,18 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Server implements Runnable {
-    private Socket clientSocket;
-    private BufferedReader reader;
-    private int clientIndex;
+    private BattleField battleField;
     private final int PORT = 34001;
     private ServerSocket serverSocket;
     private List<Socket> clients;
     private List<PrintWriter> outputStreams;
-    private static final String PLAYER1_MESSAGE = "Você é o jogador 1.";
-    private static final String PLAYER2_MESSAGE = "Você é o jogador 2.";
+
+    private Socket client;
 
     public Server() {
         try {
             this.serverSocket = new ServerSocket(PORT);
+            battleField = new BattleField();
         } catch (IOException ioException) {
             ioException.printStackTrace();
         }
@@ -30,31 +32,24 @@ public class Server implements Runnable {
     public void run() {
         clients = new ArrayList<>();
         outputStreams = new CopyOnWriteArrayList<>();
-        int connectedClients = 0;
+        int count = 0;
 
         try {
             while (true) {
-                Socket client = serverSocket.accept();
+                client = serverSocket.accept();
+
                 clients.add(client);
 
                 PrintWriter writer = new PrintWriter(client.getOutputStream());
                 outputStreams.add(writer);
 
-                Thread clientThread = new Thread(new ClientHandler(client, connectedClients));
+                Thread clientThread = new Thread(new ClientHandler(client, count));
                 clientThread.start();
-                connectedClients++;
-                System.out.println("Got a connection");
-
-                if (connectedClients == 1) {
-                    sendToUser(client, PLAYER1_MESSAGE);
-                    System.out.println("Player 1 connected");
-                } else if (connectedClients == 2) {
-                    sendToUser(client, PLAYER2_MESSAGE);
-                    System.out.println("Player 2 connected");
-                }
+                count++;
+                System.out.println("got a connection, player: " + count);
             }
-        } catch (IOException e) {
-            System.out.println("Failed to make connection: " + e.getMessage());
+        } catch (Exception e) {
+            System.out.println("Failed to make connection");
         } finally {
             try {
                 serverSocket.close();
@@ -75,6 +70,7 @@ public class Server implements Runnable {
             try {
                 InputStreamReader isReader = new InputStreamReader(this.clientSocket.getInputStream());
                 reader = new BufferedReader(isReader);
+                System.out.println("BufferedReader: " + isReader);
             } catch (IOException e) {
                 System.out.println("Error while setting up client connection: " + e.getMessage());
             }
@@ -86,7 +82,7 @@ public class Server implements Runnable {
                 String message;
                 while ((message = reader.readLine()) != null) {
                     System.out.println("Received message: " + message);
-                    sendToOtherClients(message, clientIndex);
+                    sendBothUsers(message);
                 }
             } catch (IOException e) {
                 System.out.println("Error while reading message from client: " + e.getMessage());
@@ -101,23 +97,24 @@ public class Server implements Runnable {
             }
         }
 
-        private void sendToOtherClients(String message, int senderIndex) {
-            for (int i = 0; i < clients.size(); i++) {
-                if (i != senderIndex) {
+        private void sendBothUsers(String message) {
+            for (int i = 0; i < outputStreams.size(); i++) {
+                if (!clients.get(i).equals(clientSocket)) {
+                    PrintWriter stream = outputStreams.get(i);
                     try {
-                        PrintWriter writer = new PrintWriter(clients.get(i).getOutputStream());
-                        writer.println(message);
-                        writer.flush();
-                    } catch (IOException e) {
-                         System.out.println("Error while sending message to client: " + e.getMessage());
+                        stream.println(message);
+                        System.out.println("Sending message: " + message);
+                        stream.flush();
+                    } catch (Exception e) {
+                        System.out.println("Cannot send move from server");
                     }
                 }
             }
         }
+    }
 
-        private void removeClient(int clientIndex) {
-            clients.remove(clientIndex);
-        }
+    private void removeClient(int clientIndex) {
+        clients.remove(clientIndex);
     }
 
     public static void main(String[] args) {
@@ -135,4 +132,3 @@ public class Server implements Runnable {
         }
     }
 }
-

@@ -9,6 +9,7 @@ import java.awt.event.KeyEvent;
 import static battlefield.BattleField.*;
 
 public class Controller {
+    private String playerName;
     private BattleField userBoard;
     private BattleField opponentBoard;
     private View view;
@@ -27,6 +28,8 @@ public class Controller {
 
 
     public Controller(BattleField board, Client client, View view, String playerName) throws ShipExistException, ShipBoundException {
+        this.battlefield = new BattleField();
+        this.playerName = playerName;
         initGame(board, client, playerName);
     }
 
@@ -79,30 +82,33 @@ public class Controller {
             opponentBoard.shoot(--row, --column);
             client.sendBoard(boardToString(opponentBoard.getBoard()) + "Movee");
             view.updateOpponentView(opponentBoard.getBoard());
-            opponentBoard.printField(); // Para depuração
 
             // Verifique se a posição escolhida tem uma embarcação do oponente
-            boolean hasShip = checkOpponentShip(row, column);
+            boolean hasShip = checkOpponentBoard(row, column);
 
             // Apresente o resultado em tela (pode ser personalizado de acordo com sua interface)
             if (hasShip) {
-                view.showMessage("HIT!", "Result");
-            } else {
                 view.showMessage("MISS!", "Result");
+            } else {
+                view.showMessage("HIT!", "Result");
             }
         } catch (ShotException exception) {
             shotMessage();
         }
     }
+
     private boolean checkOpponentShip(int row, int column) {
+        System.out.println("checkOpponentShip: " + row + column);
         // Implemente a lógica para verificar se a posição (row, column) tem uma embarcação do oponente
         // Use a estrutura de dados opponentBoard para fazer a verificação
         return hasShip(row, column);
     }
+
     public boolean hasShip(int x, int y) {
         int cell = battlefield.getCell(x, y);
+        System.out.println("hasShip: " + x + y);
         return cell != EMPTY && cell != MISS && cell != HIT;
-    }
+       }
 
     private void allShipsPlaced() {
         createShips(); // Exibe a mensagem da próxima embarcação antes de iniciar o jogo
@@ -162,6 +168,7 @@ public class Controller {
                 while ((message = client.getMessage()) != null) {
                     if (checkFirstMessage(message) && isFirstTime) {
                         opponentBoard.setBoard(stringToBoard(translateMessage(message)));
+                        client.sendBoard(boardToString(opponentBoard.getBoard()) + "Movee");
 //                        System.out.println("Opp Board"); // For debugging
 //                        opponentBoard.printField(); // For debugging
                         view.updateOpponentView(opponentBoard.getBoard());
@@ -231,8 +238,8 @@ public class Controller {
     }
 
     private void shotMessage() {
-        String message = "You shot there before. \nPlease try another place!";
-        String title = "Wrong Shoot";
+        String message = "Você já atirou nessa posição antes. \nPor favor, escolha outro lugar!";
+        String title = "Tiro Incorreto";
         view.sendMessage(message, title);
     }
 
@@ -254,7 +261,10 @@ public class Controller {
             view.sendMessage("There is already a ship in that position.", "Placement Error");
         }
     }
-
+    private boolean checkOpponentBoard(int row, int column) {
+        int cell = opponentBoard.getCell(row, column);
+        return cell == BattleField.SHIP;
+    }
 
     public void createShips() {
         if (currentShipIndex < ships.length) {

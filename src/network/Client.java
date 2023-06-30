@@ -15,20 +15,20 @@ import java.net.Socket;
 public class Client {
     private Socket socket;
     private BufferedReader reader;
-    private PrintWriter writer;
+    private static PrintWriter writer;
     private String newField;
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 34001;
     private BattleField field;
     private Controller controller;
     private boolean connected;
+    private View wiew;
+    private Object server;
 
     public static void main(String[] args) throws ShipExistException, ShipBoundException {
         Client client = new Client();
         View view = new View(new Controller(), "");
         String playerName = view.askUserName();
-
-
 
         client.connectToServer();
 
@@ -83,10 +83,21 @@ public class Client {
         return newField;
     }
 
-    public void sendMessageToServer(String message) {
+    public void sendMessageToServer(int row, int column) {
+        String message = row + "," + column; // Format the position as a string
         writer.println(message);
         writer.flush();
+        System.out.println("sendMessageToServer: " + wiew.askUserName() + " " + message);
+
+        // Chamar o método no Controller para processar a resposta do servidor
+        sendBoard(message);
     }
+
+   /** public void sendPositionToServer(int row, int column) {
+        sendMessageToServer(row, column);
+        System.out.println("sendPositionToServer : " + row + column);
+
+    }*/
 
     public class IncomingReader implements Runnable {
         @Override
@@ -111,4 +122,5 @@ public class Client {
             }
         }
     }
+
 }

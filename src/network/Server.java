@@ -19,6 +19,7 @@ public class Server implements Runnable {
 
     private Socket client;
 
+
     public Server() {
         try {
             this.serverSocket = new ServerSocket(PORT);
@@ -47,6 +48,8 @@ public class Server implements Runnable {
                 clientThread.start();
                 count++;
                 System.out.println("got a connection, player: " + count);
+
+
             }
         } catch (Exception e) {
             System.out.println("Failed to make connection");

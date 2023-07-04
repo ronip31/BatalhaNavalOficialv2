@@ -22,8 +22,9 @@ public class Client {
     private BattleField field;
     private Controller controller;
     private boolean connected;
-    private View wiew;
+    private View view;
     private Object server;
+    private String playerName;
 
     public static void main(String[] args) throws ShipExistException, ShipBoundException {
         Client client = new Client();
@@ -87,17 +88,17 @@ public class Client {
         String message = row + "," + column; // Format the position as a string
         writer.println(message);
         writer.flush();
-        System.out.println("sendMessageToServer: " + wiew.askUserName() + " " + message);
+        System.out.println("sendMessageToServer: " + playerName + " " + message);
 
         // Chamar o método no Controller para processar a resposta do servidor
         sendBoard(message);
     }
 
-   /** public void sendPositionToServer(int row, int column) {
+    public void sendPositionToServer(int row, int column) {
         sendMessageToServer(row, column);
         System.out.println("sendPositionToServer : " + row + column);
 
-    }*/
+    }
 
     public class IncomingReader implements Runnable {
         @Override
@@ -106,8 +107,9 @@ public class Client {
                 String message;
                 while ((message = reader.readLine()) != null) {
                     newField = message;
-                    System.out.println("Jogador " + newField + " conectado!");
+                    //System.out.println("Jogador " + newField + " conectado!");
                     System.out.println("Received message: " + message);
+
                 }
             } catch (IOException ex) {
                 System.out.println("No new field");
@@ -122,5 +124,4 @@ public class Client {
             }
         }
     }
-
 }

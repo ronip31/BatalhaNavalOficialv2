@@ -94,12 +94,6 @@ public class Client {
         sendBoard(message);
     }
 
-    public void sendPositionToServer(int row, int column) {
-        sendMessageToServer(row, column);
-        System.out.println("sendPositionToServer : " + row + column);
-
-    }
-
     public class IncomingReader implements Runnable {
         @Override
         public void run() {

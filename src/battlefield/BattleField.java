@@ -70,11 +70,10 @@ public class BattleField {
         }
     }
 
-    public boolean shoot(int x, int y) throws ShotException { // TODO is missed or hitted or empty or hit a ship
+    public void shoot(int x, int y) throws ShotException { // TODO is missed or hitted or empty or hit a ship
         if (isShot(x, y)) throw new ShotException();
         if (isEmpty(x, y)) field[x][y] = MISS;
         else field[x][y] = HIT;
-        return false;
     }
 
     private boolean isShot(int x, int y) {
@@ -104,11 +103,6 @@ public class BattleField {
     }
 
     public int getCell(int x, int y) {
-        if (x < 0 || x >= WIDTH || y < 0 || y >= HEIGHT) {
-            return -1; // ou outro valor para indicar que está fora dos limites
-        }
         return field[x][y];
     }
-
 }
-

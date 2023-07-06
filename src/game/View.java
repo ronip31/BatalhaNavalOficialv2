@@ -22,27 +22,27 @@ public class View extends JFrame {
     private int FRAME_HEIGHT;
     private JButton[][] userButtons;
     private JButton[][] opponentButtons;
-    private Controller controller;
+    private GameRules controller;
     private String opponentName;
 
-    public View(final Controller controller, String playerName) throws ShipExistException, ShipBoundException {
+    public View(final GameRules controller, String playerName) throws ShipExistException, ShipBoundException {
         this.client = client;
         this.userButtons = new JButton[WIDTH][HEIGHT];
         this.opponentButtons = new JButton[WIDTH][HEIGHT];
-       // createView(askUserName());
+        // createView(askUserName());
         this.controller = controller;
         this.FRAME_WIDTH = controller.getWidth();
         this.FRAME_HEIGHT = controller.getHeight();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         createView(playerName);
     }
-
+    // Cria a visualização do jogo
     private void createView(String playerName) throws ShipExistException, ShipBoundException {
         setLayout(new GridLayout(1, 1));
         createUserView(playerName);;
         createOpponentView();
     }
-
+    // Cria a visualização do jogador
     private void createUserView(String playerName) throws ShipExistException, ShipBoundException {
         JPanel userPanel = new JPanel();
         userPanel.setLayout(new BorderLayout());
@@ -56,7 +56,7 @@ public class View extends JFrame {
         System.out.println(playerName);
         createUserGameField(userGamePanel);
     }
-
+    // Cria a visualização do oponente
     private void createOpponentView() {
         JPanel opponentPanel = new JPanel();
         opponentPanel.setLayout(new BorderLayout());
@@ -70,14 +70,14 @@ public class View extends JFrame {
 
         createOpponentField(opponentGamePanel);
     }
-
+    // Cria o painel com o nome do jogador/oponente
     private void createPlayerNamePanel(JPanel panel, String player) {
         JPanel userNamePanel = new JPanel();
         userNamePanel.setSize(FRAME_WIDTH / 2, FRAME_HEIGHT / 13);
         userNamePanel.add(new JLabel(player));
         panel.add(userNamePanel, BorderLayout.NORTH);
     }
-
+    // Cria o tabuleiro do jogador
     private void createUserGameField(JPanel panel) {
         panel.setLayout(new GridLayout(WIDTH, HEIGHT));
         char ch = 'A';
@@ -101,7 +101,7 @@ public class View extends JFrame {
         }
     }
 
-
+    // Cria o tabuleiro do oponente
     private void createOpponentField(JPanel panel) {
         panel.setLayout(new GridLayout(WIDTH, HEIGHT));
         char ch = 'A';
@@ -124,7 +124,7 @@ public class View extends JFrame {
             }
         }
     }
-
+    // Adiciona um ouvinte de eventos de teclado para o botão
     private void listenKeyBoard(JButton button) {
         button.addKeyListener(new KeyAdapter() {
             @Override
@@ -140,7 +140,7 @@ public class View extends JFrame {
             }
         });
     }
-
+    // Coloca um navio na visualização do jogador
     public void placeShipUserView(int x, int y, int direction, Ship ship) {
         if (direction == HORIZONTAL) {
             for (int i = y; i < y + ship.getWidth(); i++) {
@@ -154,7 +154,7 @@ public class View extends JFrame {
 
         controller.createShips();
     }
-
+    // Atualiza a visualização do jogador com o estado do campo de batalha
     public void updateUserView(int[][] field) {
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
@@ -163,7 +163,7 @@ public class View extends JFrame {
             }
         }
     }
-
+    // Atualiza a visualização do oponente com o estado do campo de batalha
     public void updateOpponentView(int[][] field) {
         for (int i = 0; i < field.length; i++) {
             for (int j = 0; j < field[i].length; j++) {
@@ -180,19 +180,19 @@ public class View extends JFrame {
             }
         }
     } // TODO for opponent side of view make it disabled when user made shoot
-
+    // Exibe uma mensagem de pergunta ao jogador e retorna a resposta (sim ou não)
     public int sendQuestionMessage(String message, String title) {
         return JOptionPane.showConfirmDialog(new JFrame(), message, title, JOptionPane.YES_NO_OPTION);
     }
-
+    // Exibe uma mensagem informativa ao jogador
     public void sendInfoMessage(String message, String title) {
         JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.INFORMATION_MESSAGE);
     }
-
+    // Exibe uma mensagem com informações sobre um navio
     public void sendVessel(String title, String message, String message2) {
         JOptionPane.showMessageDialog(new JFrame(), message + message2, title, JOptionPane.INFORMATION_MESSAGE);
     }
-
+    // Exibe uma mensagem de erro ao jogador
     public void sendMessage(String message, String title) {
         JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
     }
@@ -200,7 +200,7 @@ public class View extends JFrame {
     public void showMessage(String message, String title) {
         JOptionPane.showMessageDialog(new JFrame(), message, title, JOptionPane.ERROR_MESSAGE);
     }
-
+    // Solicita ao jogador que digite seu nome e retorna o nome informado
     public String askUserName() {
         String message = "Enter Name:";
         String title = "Welcome BattleShip";
@@ -208,7 +208,7 @@ public class View extends JFrame {
         String playerName = JOptionPane.showInputDialog(frame, message, title, JOptionPane.INFORMATION_MESSAGE);
         return playerName;
     }
-
+    // Adiciona um ouvinte de eventos de clique para o tabuleiro do jogado
     private void listenUserBoard(JButton button, int row, int column) {
         button.addMouseListener(new MouseAdapter() {
             @Override
@@ -230,7 +230,7 @@ public class View extends JFrame {
                     // Captura do clique do jogador no campo do adversário
                     controller.opponentBoardClicked(row, column);
                     System.out.println("Jogador clicou na posição:" + row + column );
-                  //  client.sendPositionToServer(row, column);
+                    //  client.sendPositionToServer(row, column);
                 }
             }
         });

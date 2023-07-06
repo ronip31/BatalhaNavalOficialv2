@@ -3,7 +3,7 @@ package network;
 import battlefield.BattleField;
 import exception.ShipBoundException;
 import exception.ShipExistException;
-import game.Controller;
+import game.GameRules;
 import game.View;
 
 import java.io.BufferedReader;
@@ -19,16 +19,13 @@ public class Client {
     private String newField;
     private static final String SERVER_IP = "localhost";
     private static final int SERVER_PORT = 34001;
-    private BattleField field;
-    private Controller controller;
     private boolean connected;
     private View view;
-    private Object server;
     private String playerName;
 
     public static void main(String[] args) throws ShipExistException, ShipBoundException {
         Client client = new Client();
-        View view = new View(new Controller(), "");
+        View view = new View(new GameRules(), "");
         String playerName = view.askUserName();
 
         client.connectToServer();
@@ -41,9 +38,8 @@ public class Client {
                 e.printStackTrace();
             }
         }
-
         BattleField field = new BattleField();
-        Controller controller = new Controller(field, client, view, playerName);
+        GameRules controller = new GameRules(field, client, view, playerName);
         controller.startGame();
     }
 
@@ -61,10 +57,13 @@ public class Client {
 
             Thread readerThread = new Thread(new IncomingReader());
             readerThread.start();
+
         } catch (IOException e) {
             System.out.println("Exception: " + e.getMessage());
             connected = false; // Mark as not connected
         }
+        Thread readerThread = new Thread(new IncomingReader());
+        readerThread.start();
     }
 
     public boolean isConnected() {
@@ -103,7 +102,6 @@ public class Client {
                     newField = message;
                     //System.out.println("Jogador " + newField + " conectado!");
                     System.out.println("Received message: " + message);
-
                 }
             } catch (IOException ex) {
                 System.out.println("No new field");
@@ -119,3 +117,5 @@ public class Client {
         }
     }
 }
+
+

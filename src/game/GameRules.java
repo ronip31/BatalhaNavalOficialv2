@@ -6,9 +6,7 @@ import network.*;
 
 import java.awt.event.KeyEvent;
 
-import static battlefield.BattleField.*;
-
-public class Controller {
+public class GameRules {
     private String playerName;
     private BattleField userBoard;
     private BattleField opponentBoard;
@@ -21,18 +19,18 @@ public class Controller {
     private int shipCount;
     private BattleField battlefield;
 
-    public Controller() throws ShipExistException, ShipBoundException {
+    public GameRules() throws ShipExistException, ShipBoundException {
         this.battlefield = new BattleField();
         // this.view = new View(this, view.askUserName());
     }
 
-
-    public Controller(BattleField board, Client client, View view, String playerName) throws ShipExistException, ShipBoundException {
+    // Construtor com parâmetros
+    public GameRules(BattleField board, Client client, View view, String playerName) throws ShipExistException, ShipBoundException {
         this.battlefield = new BattleField();
         this.playerName = playerName;
         initGame(board, client, playerName);
     }
-
+    // Inicializa o jogo
     private void initGame(BattleField board, Client client, String playerName) throws ShipExistException, ShipBoundException {
         this.userBoard = board;
         this.opponentBoard = new BattleField();
@@ -44,14 +42,14 @@ public class Controller {
         Thread tt = new Thread(String.valueOf(client));
         tt.start();
     }
-
+    // Inicia o jogo
     public void startGame() {
         view.setSize(WIDTH, HEIGHT);
         view.setVisible(true);
         instructionMessage();
         allShipsPlaced(); // Chama o método allShipsPlaced() em vez de instructionMessage()
     }
-
+    // Lida com o clique nas teclas
     public void keyClicked(int key) throws ShipExistException, ShipBoundException {
         if (key == KeyEvent.VK_Q) {
             quitGameMessage();
@@ -59,7 +57,7 @@ public class Controller {
             restartGameMessage();
         }
     }
-
+    // Lida com o clique no tabuleiro do jogador
     public void userBoardClicked(int row, int column, int direction) {
         try {
             if (shipCount >= 4) throw new AllPlacedException();
@@ -69,14 +67,14 @@ public class Controller {
             //userBoard.printField(); // For debugging
             if (shipCount == 4) allShipsPlaced();
         } catch (ShipExistException exception) {
-            existMessage();
+            existMessage(); // Exibe a mensagem de erro de embarcação já existente
         } catch (ShipBoundException exception) {
-            boundMessage();
+            boundMessage(); // Exibe a mensagem de erro de embarcação fora dos limites
         } catch (AllPlacedException exception) {
-            placedMessage();
+            placedMessage(); // Exibe a mensagem de todas as embarcações colocadas
         }
     }
-
+    // Lida com o clique no tabuleiro do oponente
     public void opponentBoardClicked(int row, int column) {
         try {
             client.sendBoard(boardToString(opponentBoard.getBoard()) + "Movee");
@@ -89,7 +87,7 @@ public class Controller {
         }
     }
 
-
+    // Lida com todas as embarcações colocadas
     private void allShipsPlaced() {
         createShips(); // Exibe a mensagem da próxima embarcação antes de iniciar o jogo
         Thread incomingMove = new Thread(new IncomingMove());
@@ -98,7 +96,7 @@ public class Controller {
         client.sendBoard(boardToString(userBoard.getBoard()) + "First");
     }
 
-
+    // Converte o tabuleiro em uma representação de string
     private String boardToString(int[][] field) {
         StringBuilder builder = new StringBuilder();
         for (int[] row : field) {
@@ -109,7 +107,7 @@ public class Controller {
         }
         return builder.toString();
     }
-
+    // Converte uma mensagem de string em um tabuleiro
     private int[][] stringToBoard(String message) {
         String[] rows = message.split("/");
         String[][] cells = new String[rows.length][10];
@@ -124,20 +122,20 @@ public class Controller {
         }
         return field;
     }
-
+    // Verifica se a mensagem é a primeira mensagem
     private boolean checkFirstMessage(String message) {
         return message.endsWith("First");
     }
-
+    // Verifica se a mensagem é uma mensagem de movimento
     private boolean checkMoveMessage(String message) {
         return message.endsWith("Movee");
     }
 
-
+    // Traduz a mensagem
     private String translateMessage(String message) {
         return message.substring(0, message.length() - 5);
     }
-
+    // Classe interna para lidar com o movimento recebido
     public class IncomingMove implements Runnable {
         private boolean isFirstTime = true;
 
@@ -164,7 +162,7 @@ public class Controller {
             }
         }
     }
-
+    // Exibe a mensagem de confirmação de saída do jogo
     private void quitGameMessage() {
         String message = "Are you sure to quit game?";
         String title = "Quit";
@@ -172,7 +170,7 @@ public class Controller {
         if (selected == 0)
             System.exit(0);
     }
-
+    // Exibe a mensagem de confirmação de reinício do jogo
     private void restartGameMessage() throws ShipExistException, ShipBoundException {
         String message = "Are you sure to restart game?";
         String title = "Restart";
@@ -183,27 +181,27 @@ public class Controller {
             startGame();
         }
     }
-
+    // Exibe a mensagem de erro de embarcação já existente
     private void existMessage() {
         shipCount--;
         String message = "There is a ship already. \nPlease choose another place!";
         String title = "Warning";
         view.sendMessage(message, title);
     }
-
+    // Exibe a mensagem de erro de embarcação fora dos limites
     private void boundMessage() {
         shipCount--;
         String message = "Ship don't fit bounds. \nPlease choose another place!";
         String title = "Warning";
         view.sendMessage(message, title);
     }
-
+    // Exibe a mensagem de todas as embarcações colocadas
     private void placedMessage() {
         String message = "You placed all your ships. \nWait for your opponent!";
         String title = "All Placed";
         view.sendMessage(message, title);
     }
-
+    // Exibe a mensagem de instrução
     private void instructionMessage() {
         String message = " ***   During all game play   ***\n"
                 + " * Q - Quit Game\n"
@@ -215,17 +213,17 @@ public class Controller {
         String title = "Welcome BattleShip";
         view.sendInfoMessage(message, title);
     }
-
+    // Exibe a mensagem de tiro incorreto
     private void shotMessage() {
         String message = "Você já atirou nessa posição antes. \nPor favor, escolha outro lugar!";
         String title = "Tiro Incorreto";
         view.sendMessage(message, title);
     }
-
+    // Obtém a largura da tela
     public int getWidth() {
         return WIDTH;
     }
-
+    // Obtém a altura da tela
     public int getHeight() {
         return HEIGHT;
     }
@@ -240,12 +238,12 @@ public class Controller {
             view.sendMessage("There is already a ship in that position.", "Placement Error");
         }
     }
-
+    // Verifica se há uma embarcação no tabuleiro do oponente na posição dada
     private boolean checkOpponentBoard(int row, int column) {
         int cell = opponentBoard.getCell(row, column);
         return cell == BattleField.SHIP;
     }
-
+    // Cria as embarcações
     public void createShips() {
         if (currentShipIndex < ships.length) {
             Ship nextShip = ships[currentShipIndex];
